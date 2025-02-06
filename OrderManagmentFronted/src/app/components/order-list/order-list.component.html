@@ -1,0 +1,42 @@
+<div class="container">
+  <div class="row">
+    <div class="col-md-offset-1 col-md-10">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="row row justify-content-between">
+            <div class="col-auto">
+              <h3 class="title">Lista de Pedidos</h3>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-success" (click)="createOrder()"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+            <tr>
+              <th class="col-md-4">Cliente</th>
+              <th class="col-md-4">Nro de Productos</th>
+              <th class="col-md-2">Total</th>
+              <th class="col-md-2 text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let order of orders">
+              <td>{{order.clientName}}</td>
+              <td>{{order.productIds.length}}</td>
+              <td>S/.{{order.total}}</td>
+              <td>
+                <button class="btn btn-primary button-action" (click)="editOrder(order.id!)"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-secondary button-action" (click)="checkOrder(order.id!)"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-danger button-action" (click)="deleteOrder(order.id!)"><i class="fa fa-trash"></i></button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

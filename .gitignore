@@ -1,0 +1,10 @@
+# Ignorar dependencias
+OrderManagmentBackend/target/
+OrderManagmentBackend/.mvn/
+OrderManagmentFronted/node_modules/
+OrderManagmentFronted/dist/
+
+# Ignorar configuraciones locales
+*.env
+.idea/
+.vscode/

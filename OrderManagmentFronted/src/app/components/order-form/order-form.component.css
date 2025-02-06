@@ -1,0 +1,27 @@
+@import '../../shared/shared-styles.css';
+
+.custom-select {
+  width: 100%;
+}
+
+.selected-items ul {
+  list-style: none;
+  padding: 0;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.item-row span {
+  flex-grow: 1;
+}
+
+.btn-danger {
+  margin-left: 10px;
+}
+

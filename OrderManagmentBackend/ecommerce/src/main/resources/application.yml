@@ -1,0 +1,8 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/ecommerce
+    username: postgres
+    password: ""
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/ecommerce_db

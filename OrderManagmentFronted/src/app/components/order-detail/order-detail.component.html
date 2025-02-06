@@ -1,0 +1,69 @@
+<div class="container">
+  <div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+      <div class="col-md-9">
+        <div class="ibox">
+          <div class="ibox-title">
+            <span class="pull-right">(<strong>{{ totalProducts }}</strong>) productos</span>
+            <h2>Detalle de Pedidos</h2>
+          </div>
+          <div class="ibox-content">
+            <div class="table-responsive">
+              <table class="table shoping-cart-table">
+                <tbody>
+                <tr *ngFor="let product of products">
+                  <td width="90">
+                    <div class="cart-product-imitation">
+                    </div>
+                  </td>
+                  <td class="desc">
+                    <h3>
+                      <h3 class="text-navy">
+                        {{product.name}}
+                      </h3>
+                    </h3>
+                    <p class="small">
+                      {{product.descripcion}}
+                    </p>
+                  </td>
+                  <td>
+                    <h4>
+                      S/.{{product.price}}
+                    </h4>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ibox-content">
+            <button class="btn btn-white pull-right" (click)="back()"><i class="fa fa-arrow-left"></i> Back</button>
+
+          </div>
+        </div>
+
+      </div>
+      <div class="col-md-3">
+        <div class="ibox">
+          <div class="ibox-title">
+            <h5>Cliente: {{clientName}}</h5>
+          </div>
+        </div>
+        <div class="ibox">
+          <div class="ibox-title">
+            <h5>Precio Total</h5>
+          </div>
+          <div class="ibox-content">
+                    <span>
+                        Total
+                    </span>
+            <h2 class="font-bold">
+              S/.{{ totalPrice }}
+            </h2>
+            <hr>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
