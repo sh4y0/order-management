@@ -1,9 +1,10 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import { Order } from '../models/order'
 import {Client} from '../models/client';
 import {Product} from '../models/product';
+import {tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,13 @@ import {Product} from '../models/product';
 
 export class OrderService {
   private apiUrl = 'http://localhost:8080/api/orders';
+  private clientsSubject = new BehaviorSubject<Client[]>([]);
+  private productsSubject = new BehaviorSubject<Product[]>([]);
+
   constructor(private http: HttpClient) {}
 
   getOrders(): Observable<Order[]> {
-      return this.http.get<Order[]>(this.apiUrl);
+    return this.http.get<Order[]>(this.apiUrl);
   }
 
   getOrder(id: string): Observable<Order> {
@@ -34,11 +38,25 @@ export class OrderService {
   }
 
   getClients(): Observable<Client[]> {
-    return this.http.get<Client[]>('http://localhost:8080/api/clients');
+    if (this.clientsSubject.value.length === 0) {
+      console.log("GET CLIENTS")
+      this.http.get<Client[]>('http://localhost:8080/api/clients').pipe(
+        tap(clients => this.clientsSubject.next(clients))
+      ).subscribe();
+    }
+    return this.clientsSubject.asObservable();
+    //return this.http.get<Client[]>('http://localhost:8080/api/clients');
   }
 
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>('http://localhost:8080/api/products');
+    if (this.productsSubject.value.length === 0) {
+      console.log("GET PRODUCTS")
+      this.http.get<Product[]>('http://localhost:8080/api/products').pipe(
+        tap(products => this.productsSubject.next(products))
+      ).subscribe();
+    }
+    return this.productsSubject.asObservable();
+    //return this.http.get<Product[]>('http://localhost:8080/api/products');
   }
 
 }

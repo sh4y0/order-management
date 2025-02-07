@@ -1,11 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {FormBuilder, Validators, FormGroup, ReactiveFormsModule, FormsModule} from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Order } from '../../models/order';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {Client} from '../../models/client';
-import {Product} from '../../models/product';
+import { Client } from '../../models/client';
+import { Product } from '../../models/product';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { Observable } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-order-form',
@@ -19,7 +21,7 @@ import {Product} from '../../models/product';
   templateUrl: './order-form.component.html',
   styleUrls: ['./order-form.component.css']
 })
-export class OrderFormComponent implements OnInit{
+export class OrderFormComponent implements OnInit {
   orderForm: FormGroup;
   isEditMode = false;
   orderId?: string;
@@ -43,50 +45,54 @@ export class OrderFormComponent implements OnInit{
   ngOnInit(): void {
     this.loadClients();
     this.loadProducts();
-    this.route.params.subscribe(params => {
-      if (params['id']) {
-        this.isEditMode = true;
-        this.orderId = params['id'];
-        if (this.orderId) {
-          this.loadOrder(this.orderId);
+    this.initializeOrder();
+  }
 
-        }
+  private initializeOrder(): void {
+    this.route.params.subscribe(({ id }) => {
+      if (id) {
+        this.isEditMode = true;
+        this.orderId = id;
+        this.loadOrder(id);
       }
     });
   }
 
-  loadOrder(id: string): void {
-    this.orderService.getOrder(id).subscribe({
-      next: (order: Order) => {
+  private loadOrder(id: string): void {
+    this.orderService.getOrder(id).pipe(
+      tap((order: Order) => {
         const selectedClient = this.clients.find(client => Number(client.id) === order.clientId);
         this.orderForm.patchValue({
-          product: this.selectedProducts.map((product: Product) => product.name),
           client: selectedClient || null,
+          product: this.selectedProducts.filter(product => order.productIds.includes(Number(product.id)))
         });
-
         this.selectedProducts = this.products.filter(product => order.productIds.includes(Number(product.id)));
-      },
-      error: (err) => this.errorMessage = 'Error al cargar pedido'
-    });
+      }),
+      catchError(() => {
+        this.errorMessage = 'Error al cargar pedido';
+        return [];
+      })
+    ).subscribe();
   }
 
-
-  loadClients(): void {
-    this.orderService.getClients().subscribe({
-      next: (data) => {
-        this.clients = data;
-      },
-      error: error => this.errorMessage = error,
-    })
+  private loadClients(): void {
+    this.orderService.getClients().pipe(
+      tap((data) => this.clients = data),
+      catchError((error) => {
+        this.errorMessage = error;
+        return [];
+      })
+    ).subscribe();
   }
 
-  loadProducts(): void {
-    this.orderService.getProducts().subscribe({
-      next: (data) => {
-        this.products = data;
-      },
-      error: error => this.errorMessage = error,
-    })
+  private loadProducts(): void {
+    this.orderService.getProducts().pipe(
+      tap((data) => this.products = data),
+      catchError((error) => {
+        this.errorMessage = error;
+        return [];
+      })
+    ).subscribe();
   }
 
   onSelectItem(): void {
@@ -105,29 +111,31 @@ export class OrderFormComponent implements OnInit{
 
   onSubmit(): void {
     const selectedClient = this.orderForm.get('client')?.value;
+    if (!selectedClient) {
+      this.errorMessage = 'Cliente no válido';
+      return;
+    }
+
     const order: Order = {
       clientId: selectedClient.id,
-      productIds: this.selectedProducts.map((product) => Number(product.id)),
+      productIds: this.selectedProducts.map(product => Number(product.id)),
       clientName: selectedClient.name
     };
-    console.log("IS EDIT MODE: ", this.isEditMode)
-    console.log("SIZE PRODUCTS: ", this.selectedProducts.length)
-    if (this.isEditMode && this.orderId) {
-      console.log("SIZE PRODUCTS: ", this.selectedProducts.length)
-      this.orderService.updateOrder(this.orderId, order).subscribe({
-        next: () => this.router.navigate(['/orders']),
-        error: () => this.errorMessage = 'Error al actualizar pedido'
-      });
-    } else {
-      this.orderService.createOrder(order).subscribe({
-        next: () => this.router.navigate(['/orders']),
-        error: () => this.errorMessage = 'Error al crear pedido'
-      });
-    }
+
+    const orderRequest$ = this.isEditMode && this.orderId
+      ? this.orderService.updateOrder(this.orderId, order)
+      : this.orderService.createOrder(order);
+
+    orderRequest$.pipe(
+      tap(() => this.router.navigate(['/orders'])),
+      catchError(() => {
+        this.errorMessage = this.isEditMode ? 'Error al actualizar pedido' : 'Error al crear pedido';
+        return [];
+      })
+    ).subscribe();
   }
 
-  back(){
-    this.router.navigate(['/orders']).then(r => "")
+  back(): void {
+    this.router.navigate(['/orders']);
   }
 }
-
